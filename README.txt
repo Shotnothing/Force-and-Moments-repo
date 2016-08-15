@@ -1,6 +1,3 @@
-Author : JW & NN
+In the flowchart, I omitted detail for the settings menu as they are repetetive and not the main focus of the program.
 
-Do note that this program will create a .frc file in the same directory as the binary. 
-
-This program requires forcesintro.c (well, not really) and hgfx.h to be placed in the same directory as this program.
-
+For the gui, a resolution of 1920 x 1080 is preferable, else the "layer" listbox and a few other controls may be truncated.

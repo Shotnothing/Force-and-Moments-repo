@@ -1,0 +1,38 @@
+# depslib dependency file v1.0
+1470989192 source:c:\users\jing wen\desktop\wares\force and moments\main.c
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<math.h>
+	<conio.h>
+	<time.h>
+	<string.h>
+	<ctype.h>
+	<dirent.h>
+	"hgfx.h"
+	"forcesintro.c"
+	"resource.h"
+
+1469772301 c:\users\jing wen\desktop\wares\force and moments\forcesintro.c
+	<stdio.h>
+	<math.h>
+	"hgfx.h"
+
+1470969434 c:\users\jing wen\desktop\wares\force and moments\hgfx.h
+	<_mingw.h>
+	<windows.h>
+
+1469772301 source:c:\users\jing wen\desktop\wares\force and moments\forcesintro.c
+	<stdio.h>
+	<math.h>
+	"hgfx.h"
+
+1470969839 c:\users\jing wen\desktop\wares\force and moments\resource.h
+
+1470969838 source:c:\users\jing wen\desktop\wares\force and moments\resource.rc
+	"resource.h"
+
+1470969432 source:c:\users\jing wen\desktop\wares\force and moments\hgfx.c
+	<windows.h>
+	"hgfx.h"
+

@@ -7,7 +7,7 @@ ______                                        _  ___  ___                       
 | || (_) | | | (_|  __/\__ \ | (_| | | | | (_| | | |  | | (_) | | | | | |  __/ | | | |_\__ \
 \_| \___/|_|  \___\___||___/  \__,_|_| |_|\__,_| \_|  |_/\___/|_| |_| |_|\___|_| |_|\__|___/
 
-                                                                                Version 0.8
+                                                                                Version 0.6
 ********************************************************************************************
 Author : JW s10172747k
             - UI, graphics, framework and resultant force calculation
@@ -18,8 +18,6 @@ Input parameters:  None
 
 
 Returns:        0 : Success
-                1 : Magnitude is negative (In function input_magnitude at line 87)  //To-do : Recursive function
-                2 : Magnitude too big     (In function input_magnitude at line 87)  //To-do : Recursive function
                 3 : Event handler breaks
 */
 
@@ -48,7 +46,9 @@ Returns:        0 : Success
 #include <ctype.h>
 #include <dirent.h>
 
-#include "forcesintro.c"
+#include "hgfx.h" //Graphics library
+#include "forcesintro.c" //Script for intro
+#include "resource.h"
 
 //Initialisation [Constants]
 #define PI 3.14159265
@@ -60,7 +60,7 @@ Returns:        0 : Success
 void event_handler();
 void draw_line(int length,int type);
 void draw_splash();
-void draw_menu(float ,float ,float ,float,float,int, int, int, int, int, int, int );
+void draw_menu(float ,float ,float ,float ,float ,int ,int ,int ,int ,int ,int ,int);
 int digit_count(float);
 float input_magnitude();
 float input_angle();
@@ -91,19 +91,20 @@ void confirm_exit();
 //Initialisation [Global]
 const char *p_SaveBuffer;
 
-/*Function[force_main]
+/*Function[main]
 **************************
-Description      : To be called by main function
+Description      : Just winmain
 Input Parameters : None
-Output Returns   : 0 - Success
-                   3 - Error (Reach end of main)
+Output Returns   :
 */
 int main()
 {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    LoadIcon(hConsole, MAKEINTRESOURCE(ICON_GEAR));
+
     draw_splash();
     event_handler();
-
-    return 3; //Error
+    //should not break
 }
 
 /*Function[event_handler]
@@ -120,11 +121,14 @@ void event_handler()
     char save_string_buffer[512], out_string[512], buffer[512];
     char *pch, *pchend, *temp;
     int loop_count = 0;
-
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+    WORD menu_saved_attributes;
 
     do
     {
         system("CLS");
+        HHideCursor();
 
 
         draw_menu(
@@ -176,10 +180,7 @@ void event_handler()
             }
             case 97:        //a
             {
-                HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  //Get handle to console output
-                CONSOLE_SCREEN_BUFFER_INFO consoleInfo;             //Declare console info
                 GetConsoleScreenBufferInfo(hConsole, &consoleInfo); //Retrieve console info
-                WORD menu_saved_attributes;                         //Declare WORD
                 menu_saved_attributes = consoleInfo.wAttributes;    //Save wAttributes of console
 
                 printf("\n\n[");
@@ -192,7 +193,7 @@ void event_handler()
                 sure_label://Apologies for goto
                 switch ( tolower( getch() ) )
                 {
-                    case 'y': x_resultant = 0 , y_resultant = 0 , magnitude_resultant=0, angle_resultant=0; break;
+                    case 'y': x_resultant = 0 , y_resultant = 0 , magnitude_resultant=0, angle_resultant=0, moment_resultant = 0; break;
                     case 'n': break;
                     default: goto sure_label;
                 }
@@ -274,7 +275,6 @@ void event_handler()
 
                               pchend = strchr(buffer,'#');
                               pch = strchr(buffer,'#');
-                              loop_count = 0;
                               while (pch!=NULL && loop_count<=10)
                               {
                                 memset(out_string, 0, 512);
@@ -284,7 +284,7 @@ void event_handler()
 
                                 cprint(cGreen,bdefault,"[Good]");
                                 cprint(fdefault,bdefault,"  ");
-                                printf("Recieved %s to %d\n",out_string,loop_count);
+                                printf("Received %s to %d\n",out_string,loop_count);
 
                                 pchend=pch;
 
@@ -339,12 +339,14 @@ void event_handler()
 
             case '\r':      //Enter
             {
-                    printf("[Enter] Enter Force\n");
-                    draw_line(79,205);
+                    HShowCursor();
+                    PointCursor(0,17);
+                    printf("Enter Force\n");
+                    PointCursor(0,19);
                     magnitude = input_magnitude();
                     if (magnitude!=0)
                     {
-                        printf("\n");
+                        printf("");
 
                         angle = input_angle(degree_bool);
 
@@ -372,8 +374,6 @@ void event_handler()
                                     y_resultant = 0;
                                 if (x_resultant < pow(0.1,digit_count(magnitude))&& x_resultant > -pow(0.1,digit_count(magnitude)))              //Rounding off float s_resultant
                                     x_resultant = 0;
-                                //if (angle_resultant < pow(0.1,digit_count(magnitude))&& angle_resultant > -pow(0.1,digit_count(magnitude)))      //Rounding off float angle_resultant
-                                //    angle_resultant = 0;
                         }
                         magnitude_resultant = sqrt(pow(x_resultant,2)+pow(y_resultant,2));
 
@@ -392,10 +392,12 @@ void event_handler()
             }
             case 10:  //ctrl enter
             {
+                    HShowCursor();
                     float x_pos = 3,  y__pos = 3;
 
-                    printf("[Enter] Enter Moment\n");
-                    draw_line(79,205);
+                    PointCursor(0,17);
+                    printf("Enter Moment\n");
+                    PointCursor(0,19);
 
                     moment_flag = 1;
                     x_pos=input_x_pos();
@@ -430,7 +432,7 @@ void event_handler()
                     magnitude_resultant = sqrt(pow(x_resultant,2)+pow(y_resultant,2));
                     moment_resultant = -1*(x_pos * x_resultant + y_pos * y_resultant);
 
-                    printf("\n\nPress any key to continue, or [z] to undo\n") ;
+                    printf("\nPress any key to continue, or [z] to undo\n") ;
                     if(getch()==122)
                     {
                         x_resultant = buffer_x_resultant;
@@ -525,33 +527,38 @@ void draw_menu(float magnitude_resultant,
                int moment_flag)
 {
     float d_angle_resultant;
+    int i;
 
     if (degree_bool==1)
-    {
         d_angle_resultant = angle_resultant * 180 / PI;
-    }
 
 
         printf("      <<Forces>>     \n");
-        printf("=====================");                                                            console_plot(x_resultant,y_resultant,0,0);
-        printf("Magnitude :     %.*f   ", magnitude_precision , magnitude_resultant);               console_plot(x_resultant,y_resultant,1,magnitude_precision + digit_count(magnitude_resultant));
+        printf("=====================\n");
+        printf("Magnitude :     %.*f   \n", magnitude_precision , magnitude_resultant);
 
         if (degree_bool==1)
-        {
-                printf("Angle :         %.*f%c   ", angle_precision , d_angle_resultant, 248);      console_plot(x_resultant,y_resultant,2,angle_precision + 1 + digit_count(d_angle_resultant));
-        }
+                printf("Angle :         %.*f%c   \n", angle_precision , d_angle_resultant, 248);
         else if (degree_bool==0)
+                printf("Angle :         %.*f rad\n",angle_precision , angle_resultant);
+        printf("X - Resultant : %.*f   \n", x_resultant_precision , x_resultant);
+        printf("Y - Resultant : %.*f   \n", y_resultant_precision , y_resultant);
+
+        printf("Moment :        %.*f   \n", moment_precision ,moment_resultant);
+        printf("=====================\n");
+        toolbar(degree_bool);
+
+        for(i = 1; i < 13; i++)
         {
-                printf("Angle :         %.*f rad",angle_precision , angle_resultant);               console_plot(x_resultant,y_resultant,2,angle_precision + 1 + digit_count(angle_resultant));
+            PointCursor(50,i);
+            console_plot(x_resultant,y_resultant,i-1,0);
         }
-        printf("X - Resultant : %.*f   ", x_resultant_precision , x_resultant);                     console_plot(x_resultant,y_resultant,3,x_resultant_precision + digit_count(x_resultant));
-        printf("Y - Resultant : %.*f   ", y_resultant_precision , y_resultant);                     console_plot(x_resultant,y_resultant,4,y_resultant_precision + digit_count(y_resultant));
 
-        printf("Moment :        %.*f   ", moment_precision ,moment_resultant);                      console_plot(x_resultant,y_resultant,5,moment_precision + digit_count(moment_resultant));
-        printf("=====================");                                                            console_plot(x_resultant,y_resultant,6,0);
-        toolbar(degree_bool);                                                                       console_plot(x_resultant,y_resultant,7,-8);
-
+        PointCursor(0,10);
         menu_options(x_resultant,y_resultant);
+
+        PointCursor(0,18);
+        draw_line(79,205);
 }
 
 /*Function[Digit Count]
@@ -587,7 +594,7 @@ float input_magnitude()
             printf("Value of magnitude cannot be negative.\n\n");
             printf("Press any key to continue\n") ;
             getch();
-            return input_magnitude();                                                               //Calls to re-enter values
+            return 0;                                                               //Calls to re-enter values
         }
         else if (magnitude >= 3.4E+38)
         {
@@ -595,7 +602,7 @@ float input_magnitude()
             printf("Value of magnitude cannot be bigger than 3.4E+38.\n\n");
             printf("Press any key to continue\n") ;
             getch();
-            return input_magnitude();                                                               //Calls to re-enter values
+            return 0;                                                               //Calls to re-enter values
         }
         else if (magnitude < 3.4E+38 && 0 < magnitude)
         {
@@ -688,7 +695,7 @@ float resolve_angle(int degree_bool, float angle)
 
 /*Function[input_x_pos]
 **************************
-Description      :
+Description      : Prompts for x position
 Input Parameters : none
 Output Returns   : angle       (Float)
 */
@@ -699,6 +706,10 @@ float input_x_pos()
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);  //Get handle to console output
         COORD cursor_coords;
 
+        PointCursor(0,18);
+        draw_line(80,205);
+
+        PointCursor(0,19);
         printf("Enter %cx : ",127);
         scanf("%f",&x_pos);
         if (x_pos <= 2147483646 && x_pos >= -2147483647)
@@ -708,15 +719,13 @@ float input_x_pos()
         else
         {
             if (x_pos > 2147483646)
-            printf("\nToo big, must be under 2147483647 for accurate computation.\nPress any key to continue.");
+            {
+                printf("\nToo big, must be under 2147483647 for accurate computation.\nPress any key to continue.");
+            }
 
             else if (x_pos < -2147483647)
-            printf("\nToo small, must be above -2147483648 for accurate computation.\nPress any key to continue.");
-
-            else
             {
-                printf("Error : input_x_pos()");
-                exit(-1);
+                printf("\nToo small, must be above -2147483648 for accurate computation.\NPress any key to continue.");
             }
 
             cursor_coords.X = 0;
@@ -737,9 +746,9 @@ float input_x_pos()
 
 }
 
-/*Function[input_x_pos]
+/*Function[input_y_pos]
 **************************
-Description      :
+Description      : Prompts for y position
 Input Parameters : none
 Output Returns   : angle       (Float)
 */
@@ -765,12 +774,6 @@ float input_y_pos()
             else if (y_pos < -2147483647)
             printf("\nToo small, must be above -2147483648 for accurate computation.\nPress any key to continue.");
 
-            else
-            {
-                printf("Error : input_y_pos()");
-                exit(-1);
-            }
-
             cursor_coords.X = 0;
             cursor_coords.Y = 18;
             getch();
@@ -790,7 +793,7 @@ float input_y_pos()
 
 /*Function[console_plot]
 **************************
-Description      :
+Description      : Plots the graph thing
 Input Parameters : x_resultant (Float)
                    y_resultant (Float)
 Output Returns   : none (Void)
@@ -894,17 +897,11 @@ void console_plot(float x_resultant, float y_resultant, int rowno, int indent)
             }
         }
 
-    //for(x=0;x<=11;x++)
-    //{
-            for (i=0;i<=(27-indent);i++)
-                printf(" ");
+        for(y=0;y<=27;y++)
+        {
+            printf("%c",element[rowno][y]);
+        }
 
-            for(y=0;y<=27;y++)
-            {
-                printf("%c",element[rowno][y]);
-            }
-            printf("\n");
-    //}
 }
 
 /*Function[console_plot_moment]
@@ -1036,15 +1033,13 @@ Output Returns   : none (Void)
 */
 void menu_options(float x_resultant, float y_resultant)
 {
-    printf("Options:        [Enter]      Enter Force");                           console_plot(x_resultant,y_resultant,8,19);
-    printf("                [Ctrl+Enter] Enter Moment");                          console_plot(x_resultant,y_resultant,9,20);
-                                                                                  console_plot(x_resultant,y_resultant,10,-21);
-    printf("                [a]          Clear");                                 console_plot(x_resultant,y_resultant,11,13);
-    printf("                [s]          Settings");
-    printf("\n                [d]          Toggle Angle Unit");
-    printf("\n\n");
+    printf("Options:        [Enter]      Enter Force\n");
+    printf("                [Ctrl+Enter] Enter Moment\n");
 
-    printf("Input Option:   ");
+    printf("                [a]          Clear\n");
+    printf("                [s]          Settings\n");
+    printf("                [d]          Toggle Angle Unit");
+    printf("\n\n");
 }
 
 /*Function[colours_menu]
@@ -1268,8 +1263,6 @@ Output Returns   : none (Void)
 void change_page(int page)
 {
         int message_stream;
-        printf("Use arrow keys to navigate.\n");
-        printf("<<                                  >>");
         message_stream = getch();
         switch(message_stream)
         {
@@ -1306,9 +1299,9 @@ void change_page(int page)
     {
         switch (page%3)
         {
-            case 0: help_menu_ginfo();
-            case 1: help_menu_ui();
-            case 2: help_menu_calc();
+            case 0: help_menu_ginfo(); break;
+            case 1: help_menu_ui(); break;
+            case 2: help_menu_calc(); break;
         }
     }
 
@@ -1330,10 +1323,13 @@ void help_menu_ginfo()
         system("CLS");
         printf("    << General Information >>\n");
         printf("==================================\n\n");
-        printf("Author: s10172747 \n");
+        printf("Author:  s10172747 & s10173318e \n");
         printf("Time  :  %d:%d:%d\n",stime.tm_hour, stime.tm_min, stime.tm_sec);
         printf("Date  :  %d/%d/%d\n\n", stime.tm_mday, stime.tm_mon + 1, stime.tm_year + 1900);
-        printf("This is a project for 6compro.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        printf("This is a project for 6compro.");
+        PointCursor(0,23);
+        printf("Use arrow keys to navigate.\n");
+        printf("<< Calculation                                                User Interface >>");
         change_page(9);
         break;
     }
@@ -1352,10 +1348,10 @@ void help_menu_ui()
         system("CLS");
         printf("      << User Interface >>\n");
         printf("==================================\n\n");
-        printf("Work In Progress, there is no need for one yet.\n");
-        printf("\n");
-        printf("\n\n");
-        printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+        printf("Not much to write about actually.\n");
+        PointCursor(0,23);
+        printf("Use arrow keys to navigate.\n");
+        printf("<< Gen Info                                                     Calculation  >>");
         change_page(10);
         break;
     }
@@ -1387,8 +1383,9 @@ void help_menu_calc()
         printf(" %c = atan ( %cY %c %cX )\n",233,127,246,127);
         printf("\n");
         printf(" moment = %c f * d\n",228);
-        printf("\n");
-        printf("\n\n\n\n\n\n");
+        PointCursor(0,23);
+        printf("Use arrow keys to navigate.\n");
+        printf("<< User Interface                                                   Gen Info >>");
         change_page(11);
         break;
     }
@@ -1396,7 +1393,7 @@ void help_menu_calc()
 
 /*Function[help_menu_calc]
 **************************
-Description      : Prompts user to change precision of output, not implemented
+Description      : Prompts user to change precision of output
 Input Parameters : none (Void)
 Output Returns   : Precision (Int)
 */
@@ -1484,53 +1481,6 @@ char *saveload_menu()
 
 void save_for()
 {
-    /*
-    int i;
-    char filename[128];
-
-    system("cls");
-    printf("<<   Browse Files    >>\n\n");
-
-      DIR *dp;
-      struct dirent *ep;
-      dp = opendir ("./sav");
-      if (dp != NULL)
-      {
-        i=1;
-        while (ep = readdir (dp))
-        {
-
-            printf("%d  :   ",i);
-
-            puts (ep->d_name);
-            i = i+1;
-        }
-        (void) closedir (dp);
-      }
-      else
-        printf("ERROR: /sav directory cannot be opened.");
-
-    printf("\n\nSave As  : ");
-    receiveInput( filename );
-    printf("\n");
-    cprint(cGreen,bdefault,"[Low] ");
-    cprint(fdefault,bdefault,"Attempting to save as %s\n", filename);
-
-      if (dp != NULL)
-      {
-        i=1;
-        while (ep = readdir (dp))
-        {
-
-            printf("%d  :   ",i);
-
-            puts (ep->d_name);
-            i = i+1;
-        }
-        (void) closedir (dp);
-      }
-        */
-
         system("cls");
         cprint(fdefault,bdefault,"Overwrite Save?  [y/n]");
         switch( tolower( getch() ) )
@@ -1571,7 +1521,6 @@ void save_for()
 
 char *load_for()
 {
-
         static char buffer[512];
 
         system("cls");
@@ -1597,7 +1546,7 @@ char *load_for()
                 }
                 return buffer;
 
-            case 'n' : break;
+            case 'n' : return 0;
             default :load_for(); break;
         }
 }

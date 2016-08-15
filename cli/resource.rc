@@ -1,0 +1,2 @@
+#include "resource.h"
+ICON_GEAR ICON "icon.ico"

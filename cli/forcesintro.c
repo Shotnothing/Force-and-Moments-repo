@@ -76,9 +76,6 @@ extern void forcesintro()
 
          Sleep(20);
     }
-
-
-
         j = 0;
         forecolour  = cGrey;
         while(j<3)
@@ -124,8 +121,6 @@ extern void forcesintro()
 
         Sleep(300);
     }
-
-
     FillScreen(fdefault,bdefault,0,0,' ');
 }
 

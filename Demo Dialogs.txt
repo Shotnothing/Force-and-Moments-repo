@@ -1,0 +1,37 @@
+==============================================
+1.
+[Enter] Enter Force
+[Magnitude] 123
+[Enter] (Submit)
+[Angle] 35
+[Enter] (Submit)
+==============================================
+2.
+[Enter] Enter Moment
+[Delta X] 32
+[Enter] (Submit)
+[Delta Y] -43
+[Enter] (Submit)
+[Magnitude] 23
+[Enter] (Submit)
+[Angle] 24
+[Enter] (Submit)
+==============================================
+3.
+[Enter] Enter Moment
+[Delta X] 2454
+[Enter] (Submit)
+[Delta Y] -3535
+[Enter] (Submit)
+[Magnitude] 44
+[Enter] (Submit)
+[Angle] 5353
+[Enter] (Submit)
+
+[Swap Unit] Swap to radians
+
+[Enter] Enter Force
+[Magnitude] 123
+[Enter] (Submit)
+[Angle] 0.4
+[Enter] (Submit)

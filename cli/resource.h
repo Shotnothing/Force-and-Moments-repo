@@ -1,0 +1,6 @@
+#ifndef RESOURCE_H_INCLUDED
+#define RESOURCE_H_INCLUDED
+
+#define ICON_GEAR  420
+
+#endif // RESOURCE_H_INCLUDED
